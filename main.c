@@ -57,7 +57,7 @@ void outputString(char* out) {
     }
     printf("\33[%d;0H\33[107m", ws.ws_row-1);
     printf(" %s | %d\33[0;0H\33[0m", mode, ln);
-    printf("\n\033[48;2;30;30;30m\033[38;2;50;50;50m~ \033[0m\033[48;2;30;30;30m");
+    printf("\n\033[48;2;30;30;30m\033[38;2;50;50;50m ~ \033[0m\033[48;2;30;30;30m");
     for (int i = 0; i < strlen(out); i++) {
         if (out[i] == '\n') {
             // Set both the foreground and background colors for the "~ " part
