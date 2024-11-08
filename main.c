@@ -61,7 +61,7 @@ void outputString(char* out) {
     for (int i = 0; i < strlen(out); i++) {
         if (out[i] == '\n') {
             // Set both the foreground and background colors for the "~ " part
-            printf("\n\033[48;2;30;30;30m\033[38;2;50;50;50m~ \033[0m\033[48;2;30;30;30m");
+            printf("\n\033[48;2;30;30;30m\033[38;2;50;50;50m ~ \033[0m\033[48;2;30;30;30m");
         } else {
             putchar(out[i]);
         }
