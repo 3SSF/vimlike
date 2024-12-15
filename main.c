@@ -6,8 +6,9 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-#define INS_STR "\33[93m--INSERT--"
+#define INS_STR "\33[92m--INSERT--"
 #define NOR_STR "\33[91m--NORMAL--"
+#define CMD_STR "\33[94m--COMMAND--"
 
 struct termios oldTerm, newTerm;
 struct winsize winSize;
@@ -94,6 +95,7 @@ void outputString(const char *out) {
 void programLoop(char *fileContents) {
     size_t initialSize = strlen(fileContents);
     char *inputBuffer = (char *)malloc(initialSize + 2);
+    char fileModified = 0;
     if (inputBuffer == NULL) {
         result = 255;
         return;
@@ -116,12 +118,15 @@ void programLoop(char *fileContents) {
             } else if (buf != 127 && index < (initialSize + 10000)) {  // Prevent buffer overflow
                 inputBuffer[index++] = buf;
                 inputBuffer[index] = '\0';  // Null-terminate the string
+                fileModified = 1;
             }
         } else {
             if (buf == 'i') {
                 strcpy(mode, INS_STR);
             }
             if (buf == ':') {
+                strcpy(mode, CMD_STR);
+                outputString(inputBuffer);
                 printf("\33[%d;0H:", winSize.ws_row);
                 fflush(stdout);  // Ensure prompt is displayed
                 char buf2;
@@ -130,7 +135,10 @@ void programLoop(char *fileContents) {
 
                 while (1) {
                     buf2 = getchar();
-                    if (buf2 == 27) break;
+                    if (buf2 == 27){
+                        strcpy(mode, INS_STR);
+                        break;
+                    }
                     else if (buf2 == 127 && i2 > 0) {
                         inputCommand[--i2] = '\0';
                     }
@@ -139,12 +147,18 @@ void programLoop(char *fileContents) {
                         if (!strcmp(inputCommand, "wq") || !strcmp(inputCommand, "x")) {
                             writeToFile(inputBuffer);
                             breakLoop = 1;
-                            break;
                         }
-                        if (!strcmp(inputCommand, "q")) {
+                        if (!strcmp(inputCommand, "q") && fileModified != 0) {
+                            printf("\33[%d;0H\033[0m\033[48;2;30;30;30mFile has been modified, use 'q!' to quit forcefully", winSize.ws_row);
+                        } else if (!strcmp(inputCommand, "q") && fileModified == 0){
                             breakLoop = 1;
                             break;
                         }
+                        if (!strcmp(inputCommand, "q!")){
+                            breakLoop = 1;
+                            break;
+                        }
+                        strcpy(mode, NOR_STR);
                         break;
                     }
                     else {
