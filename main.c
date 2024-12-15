@@ -84,7 +84,8 @@ void outputString(const char *out) {
         if (out[i] == '\n') {
             printf("\n\033[48;2;30;30;30m\033[38;2;50;50;50m ~ \033[0m\033[48;2;30;30;30m");
         } else {
-            putchar(out[i]);
+            if (out[i] != '\t') putchar(out[i]);
+            else printf("    ");
         }
     }
     printf("\033[0m");
